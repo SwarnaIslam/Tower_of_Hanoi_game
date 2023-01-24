@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Bootstrap 5 Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body{
+        background-image: url("ClassWork/istockphoto-1182467056-612x612.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .col-md-4{
+        display: flex;
+        flex-direction: column-reverse;
+
+    }
+    #col1, #col2, #col3{
+        align-items: center;
+        border: 1px black solid;
+        width: 33.33%;
+    }
+    #col1{
+        background-color: rgba(255, 166, 0, 0.616);
+    }
+    #col2{
+        background-color: rgba(172, 255, 47, 0.575);
+    }
+    #col3{
+        background-color: rgba(255, 0, 0, 0.432);
+    }
+    
+    #stoneHolder{
+        height: 400px;
+    }
+    .ellipse{
+        background-color: brown;
+        border: 2px black solid;
+        width: 50%;
+    }
+  </style>
+    </head>
+    <body class="bg-black">
+        <div class="container">
+            <div class="row" id="stoneHolder">
+                <div class="col-md-4" id="col1"></div>
+                <div class="col-md-4" id="col2"></div>
+                <div class="col-md-4" id="col3"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><button class="btn btn-primary btn-block" onclick="move('col1','col2')">1->2</button></div>
+                <div class="col-md-4"><button class="btn btn-primary btn-block" onclick="move('col2','col3')">2->3</button></div>
+                <div class="col-md-4"><button class="btn btn-primary btn-block" onclick="move('col3','col1')">3->1</button></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><button class="btn btn-primary btn-block" onclick="move('col3','col2')">3->2</button></div>
+                <div class="col-md-4"><button class="btn btn-primary btn-block" onclick="move('col2','col1')">2->1</button></div>
+                <div class="col-md-4"><button class="btn btn-primary btn-block" onclick="move('col1','col3')">1->3</button></div>
+            </div>
+            <div class="row">
+                <button onclick="check()" class="btn btn-info">Check!</button>
+                <button onclick="createStones()" class="btn btn-warning">Restart</button>
+            </div>
+            <!-- The Modal -->
+            <div class="modal fade" id="sortedModal">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                        <h1 class="modal-title mx-auto" >SORTED!</h1>
+                        </div>
+                
+                        
+                
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-success mx-auto" data-bs-dismiss="modal" onclick="createStones()">Start New Game</button>
+                        </div>
+                
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="unsortedModal">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                        <h1 class="modal-title mx-auto" >Not Sorted Yet!</h1>
+                        </div>
+                
+                        
+                
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-warning mx-auto" data-bs-dismiss="modal" onclick="createStones()">Try Again</button>
+                        </div>
+                
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="not-together">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                        <h1 class="modal-title mx-auto" >Try put all the stones together!</h1>
+                        </div>
+                
+                        
+                
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-warning mx-auto" data-bs-dismiss="modal">Continue</button>
+                        </div>
+                
+                    </div>
+                </div>
+            </div>
+            <div style="position: relative;" >
+                <button id="moves" style="position: absolute; left: 0;color: white; background: transparent;">Moves:&nbsp; 0</button>
+                <button id="bestMove" style="position: absolute; right: 0; color: white; background: transparent;">Shortest  try: &nbsp; 0</button>
+            </div>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script>
+            let moves=0;
+            let ShortestMove=Number.MAX_VALUE;
+            let moveNum=document.getElementById("moves");
+            let bestNum=document.getElementById("bestMove");
+
+            // generate random numbers between 3-5
+            let numberOfStones=Math.floor(Math.random()*3)+3;
+            let col1=document.getElementById("col1");
+            let col2=document.getElementById("col2");
+            let col3=document.getElementById("col3");
+            (function(){
+                createStones();
+            })();
+
+            function createStones(){
+                numberOfStones=Math.floor(Math.random()*3)+3;
+                let arr = [];
+                do {
+                    let ran = Math.floor(Math.random() * numberOfStones)+1; 
+                    arr = arr.indexOf(ran) > -1 ? arr : arr.concat(ran);
+                }while (arr.length < numberOfStones);
+                while(sorted(arr)==true){
+                    arr=arr.sort((a, b) => 0.5 - Math.random());
+                }
+                col1.innerHTML=''
+                col2.innerHTML=''
+                col3.innerHTML=''
+                for(let i=0;i<numberOfStones;i++){
+                    let btn=document.createElement("button");
+                    btn.classList.add("ellipse");
+                    btn.innerText=arr[i];
+                    col1.appendChild(btn);
+                }
+            }
+
+            
+            function check(){
+
+                let col1Children=col1.children
+                let col2Children=col2.children
+                let col3Children=col3.children
+
+                let containsAll=(col1Children.length===numberOfStones)?col1:(col2Children.length===numberOfStones)?col2:(col3Children.length===numberOfStones)?col3:undefined;
+
+                if(containsAll!=undefined){
+                    let flag=true;
+                    let children=containsAll.children;
+                    for(let i=numberOfStones-1;i>0;i--){
+                        let firstVal=parseInt(children[i].innerText);
+                        let secondVal=parseInt(children[i-1].innerText);
+
+                        if(secondVal<firstVal){
+                            flag=false;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        $('#sortedModal').modal('show');
+                        if(ShortestMove>moves){
+                            ShortestMove=moves;
+                            bestNum.innerText="Shortest  try:  "+ShortestMove;
+                        }
+                        moves=0;
+
+                    }
+                    else{
+                        $('#unsortedModal').modal('show');
+                    }
+                }
+                else{
+                    $('#not-together').modal('show');
+                    console.log("Put all the stones together!");
+                }
+            }
+            function sorted(arr){
+                let second_index;
+                for(let first_index = 0; first_index < arr.length; first_index++){
+                    second_index = first_index + 1;
+                    if(arr[second_index] - arr[first_index] < 0) return false;
+                }
+                
+                return true;
+            }
+            function move(colId1, colId2){
+                let fromDiv=document.getElementById(colId1);
+                let toDiv=document.getElementById(colId2);
+                if(fromDiv.children.length!=0){
+                    
+                    let fromNum=parseInt(fromDiv.lastElementChild.innerText);
+                
+                        if(toDiv.children.length===0){
+                            moves++;
+                            moveNum.innerText="Moves: "+moves;
+                            toDiv.appendChild(fromDiv.lastElementChild);
+                        }
+                        else{
+                            let toNum=parseInt(toDiv.lastElementChild.innerText);
+                            if(fromNum<=toNum){
+                                moves++;
+                                moveNum.innerText="Moves: "+moves;
+                                toDiv.appendChild(fromDiv.lastElementChild);
+                            }
+                        }
+                    }
+            }
+            
+        </script>
+    </body>
+</html>
